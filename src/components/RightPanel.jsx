@@ -1,26 +1,23 @@
 import { PRAYERS } from '../data'
 import PrayerGrid from './PrayerGrid'
 import ScreenTracker from './ScreenTracker'
-import WeekHeatmap from './WeekHeatmap'
+import WeekChart from './WeekChart'
 import NotifLog from './NotifLog'
 import styles from './RightPanel.module.css'
 
 function pad(n) { return String(n).padStart(2, '0') }
-const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+const DAYS_SHORT  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 function MiniClock({ now }) {
-  const h = pad(now.getHours())
-  const m = pad(now.getMinutes())
-  const s = pad(now.getSeconds())
-  const dayName = DAYS[now.getDay()]
-  const monthName = MONTHS[now.getMonth()]
-  const day = now.getDate()
+  const h = pad(now.getHours()), m = pad(now.getMinutes()), s = pad(now.getSeconds())
+  const dayName   = DAYS_SHORT[now.getDay()]
+  const monthName = MONTHS_SHORT[now.getMonth()]
+  const day       = now.getDate()
 
-  // Day progress: 5am = 0%, 10pm = 100%
-  const totalMins = 17 * 60 // 5am to 10pm = 17h
+  const totalMins   = 17 * 60  // 5am–10pm window
   const elapsedMins = Math.max(0, (now.getHours() - 5) * 60 + now.getMinutes())
-  const pct = Math.min((elapsedMins / totalMins) * 100, 100)
+  const pct         = Math.min((elapsedMins / totalMins) * 100, 100)
 
   return (
     <div className={styles.miniClock}>
@@ -41,7 +38,7 @@ function MiniClock({ now }) {
 }
 
 export default function RightPanel({
-  now, tasks, screenMins, weekScores,
+  now, tasks, screenMins, weekScores, weekData,
   notifLog, onToggleTask, onAddScreen, onResetScreen, onClearLog
 }) {
   return (
@@ -49,7 +46,7 @@ export default function RightPanel({
       <MiniClock now={now} />
       <PrayerGrid prayers={PRAYERS} tasks={tasks} onToggle={onToggleTask} />
       <ScreenTracker screenMins={screenMins} onAdd={onAddScreen} onReset={onResetScreen} />
-      <WeekHeatmap weekScores={weekScores} />
+      <WeekChart weekScores={weekScores} weekData={weekData} />
       <NotifLog log={notifLog} onClear={onClearLog} />
     </aside>
   )

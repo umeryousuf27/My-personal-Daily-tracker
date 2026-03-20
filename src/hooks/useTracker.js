@@ -12,6 +12,32 @@ function formatHHMM(date) {
   return date.toTimeString().slice(0, 5)
 }
 
+// ─── Notification Chime (Web Audio API, no files needed) ────────────────────
+function playChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const notes = [
+      { freq: 880,  start: 0,    dur: 0.18 },
+      { freq: 1108, start: 0.18, dur: 0.18 },
+      { freq: 1320, start: 0.36, dur: 0.35 },
+    ]
+    notes.forEach(({ freq, start, dur }) => {
+      const osc  = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.type = 'sine'
+      osc.frequency.value = freq
+      gain.gain.setValueAtTime(0, ctx.currentTime + start)
+      gain.gain.linearRampToValueAtTime(0.28, ctx.currentTime + start + 0.025)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur)
+      osc.start(ctx.currentTime + start)
+      osc.stop(ctx.currentTime + start + dur + 0.05)
+    })
+  } catch (_) {}
+}
+
+// ─── State helpers ────────────────────────────────────────────────────────────
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -20,13 +46,14 @@ function loadState() {
   return null
 }
 
-function freshState(weekScores = {}) {
+function freshState(weekScores = {}, weekData = {}) {
   return {
     date: todayISO(),
     tasks: {},
     lcSeconds: 0,
     screenMins: 0,
     weekScores,
+    weekData,
   }
 }
 
@@ -34,11 +61,24 @@ function maybeReset(saved) {
   const today = todayISO()
   if (!saved || saved.date !== today) {
     const weekScores = saved?.weekScores || {}
+    const weekData   = saved?.weekData   || {}
     if (saved?.date) {
       const tasksDone = Object.values(saved.tasks || {}).filter(Boolean).length
       weekScores[saved.date] = tasksDone
+      // Save full day snapshot
+      weekData[saved.date] = {
+        tasks:     saved.tasks     || {},
+        lcSeconds: saved.lcSeconds || 0,
+        screenMins:saved.screenMins|| 0,
+        score:     tasksDone,
+      }
+      // Only keep last 14 days of snapshots
+      const keys = Object.keys(weekData).sort().slice(-14)
+      const trimmed = {}
+      keys.forEach(k => { trimmed[k] = weekData[k] })
+      return freshState(weekScores, trimmed)
     }
-    return freshState(weekScores)
+    return freshState(weekScores, weekData)
   }
   return saved
 }
@@ -47,57 +87,62 @@ let toastIdCounter = 0
 let notifIdCounter = 0
 
 export function useTracker() {
-  const [state, setState] = useState(() => maybeReset(loadState()))
-  const [now, setNow] = useState(new Date())
-  const [timer, setTimer] = useState(null)
-  const [toasts, setToasts] = useState([])
+  const [state, setState]       = useState(() => maybeReset(loadState()))
+  const [now, setNow]           = useState(new Date())
+  const [timer, setTimer]       = useState(null)
+  const [toasts, setToasts]     = useState([])
   const [notifLog, setNotifLog] = useState([])
   const [notifGranted, setNotifGranted] = useState(
     typeof Notification !== 'undefined' && Notification.permission === 'granted'
   )
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('umer_sound') ?? 'true') } catch { return true }
+  })
 
   const notifFired = useRef({})
-  const timerRef = useRef(null)
+  const timerRef   = useRef(null)
 
   // Persist state
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [state])
 
-  // Clock tick — every second
+  // Persist sound preference
   useEffect(() => {
-    const id = setInterval(() => {
-      setNow(new Date())
-    }, 1000)
+    localStorage.setItem('umer_sound', JSON.stringify(soundEnabled))
+  }, [soundEnabled])
+
+  // Clock tick
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(id)
   }, [])
 
   // Timer tick
   useEffect(() => {
-    if (!timer) {
-      if (timerRef.current) clearInterval(timerRef.current)
-      return
-    }
+    if (!timer) { if (timerRef.current) clearInterval(timerRef.current); return }
     timerRef.current = setInterval(() => {
       setTimer(t => t ? { ...t, elapsed: Math.floor((Date.now() - t.startMs) / 1000) } : null)
     }, 1000)
     return () => clearInterval(timerRef.current)
   }, [timer?.taskId, timer?.startMs])
 
-  // Notification system
+  // Push notification (internal + toast + sound + browser)
   const pushNotif = useCallback((title, body, color = 'blue') => {
-    const id = ++notifIdCounter
+    const id    = ++notifIdCounter
     const entry = { id, title, body, color, time: formatHHMM(new Date()) }
 
-    setToasts(prev => [{ ...entry, toastId: ++toastIdCounter }, ...prev])
+    setToasts(prev  => [{ ...entry, toastId: ++toastIdCounter }, ...prev])
     setNotifLog(prev => [entry, ...prev].slice(0, 20))
+
+    if (soundEnabled) playChime()
 
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
       try { new Notification(`Umer Tracker — ${title}`, { body }) } catch {}
     }
-  }, [])
+  }, [soundEnabled])
 
-  // Schedule notifications
+  // Schedule notifications (fires on exact second=0)
   useEffect(() => {
     if (now.getSeconds() !== 0) return
     const dateKey = todayISO()
@@ -105,13 +150,11 @@ export function useTracker() {
     const m = now.getMinutes()
 
     SCHEDULE.forEach(item => {
-      // Exact task time
       const onKey = `${item.id}_on_${dateKey}`
       if (h === item.h && m === item.m && !notifFired.current[onKey]) {
         notifFired.current[onKey] = true
         pushNotif(item.task, item.sub, item.color)
       }
-      // 5-min warning
       const warnKey = `${item.id}_warn_${dateKey}`
       const warnH = item.m >= 5 ? item.h : item.h - 1
       const warnM = item.m >= 5 ? item.m - 5 : item.m + 55
@@ -121,30 +164,26 @@ export function useTracker() {
       }
     })
 
-    // Screen time warning
     const screenWarnKey = `screen_warn_${dateKey}`
     if (state.screenMins >= 90 && !notifFired.current[screenWarnKey]) {
       notifFired.current[screenWarnKey] = true
-      pushNotif('Screen Time Limit Hit', `You've used ${state.screenMins}m of social media today`, 'amber')
+      pushNotif('Screen Time Limit Hit', `You've used ${state.screenMins}m today`, 'amber')
     }
   }, [now, state.screenMins, pushNotif])
 
-  // Derived
-  const tasksDone = Object.values(state.tasks).filter(Boolean).length
+  // ─── Derived values ──────────────────────────────────────────────────────────
+  const tasksDone  = Object.values(state.tasks).filter(Boolean).length
   const prayersDone = PRAYERS.filter(p => state.tasks[p.id]).length
 
   const currentTaskId = (() => {
-    const h = now.getHours()
-    const m = now.getMinutes()
+    const h = now.getHours(), m = now.getMinutes()
     const total = h * 60 + m
-    let current = null
     for (let i = 0; i < SCHEDULE.length; i++) {
-      const s = SCHEDULE[i]
-      const start = s.h * 60 + s.m
+      const s    = SCHEDULE[i]
       const next = SCHEDULE[i + 1] ? SCHEDULE[i + 1].h * 60 + SCHEDULE[i + 1].m : 24 * 60
-      if (total >= start && total < next) { current = s.id; break }
+      if (total >= s.h * 60 + s.m && total < next) return s.id
     }
-    return current
+    return null
   })()
 
   const weekScores = (() => {
@@ -153,63 +192,36 @@ export function useTracker() {
     return scores
   })()
 
-  // Actions
-  const toggleTask = useCallback((id) => {
-    setState(s => ({ ...s, tasks: { ...s.tasks, [id]: !s.tasks[id] } }))
-  }, [])
-
-  const addScreen = useCallback((mins) => {
-    setState(s => ({ ...s, screenMins: (s.screenMins || 0) + mins }))
-  }, [])
-
-  const resetScreen = useCallback(() => {
-    setState(s => ({ ...s, screenMins: 0 }))
-  }, [])
-
-  const resetDay = useCallback(() => {
-    setState(s => ({ ...freshState(s.weekScores), weekScores: s.weekScores }))
-    setTimer(null)
-    notifFired.current = {}
-  }, [])
-
-  const startTimer = useCallback((id, name, color) => {
-    setTimer({ taskId: id, taskName: name, color, startMs: Date.now(), elapsed: 0 })
-  }, [])
-
-  const stopTimer = useCallback(() => {
+  // ─── Actions ──────────────────────────────────────────────────────────────────
+  const toggleTask      = useCallback((id) => setState(s => ({ ...s, tasks: { ...s.tasks, [id]: !s.tasks[id] } })), [])
+  const addScreen       = useCallback((mins) => setState(s => ({ ...s, screenMins: (s.screenMins || 0) + mins })), [])
+  const resetScreen     = useCallback(() => setState(s => ({ ...s, screenMins: 0 })), [])
+  const resetDay        = useCallback(() => { setState(s => ({ ...freshState(s.weekScores, s.weekData) })); setTimer(null); notifFired.current = {} }, [])
+  const startTimer      = useCallback((id, name, color) => setTimer({ taskId: id, taskName: name, color, startMs: Date.now(), elapsed: 0 }), [])
+  const stopTimer       = useCallback(() => {
     setTimer(t => {
       if (!t) return null
-      if (t.taskId === 'lc') {
-        setState(s => ({ ...s, lcSeconds: (s.lcSeconds || 0) + t.elapsed }))
-      }
+      if (t.taskId === 'lc') setState(s => ({ ...s, lcSeconds: (s.lcSeconds || 0) + t.elapsed }))
       pushNotif(`${t.taskName} logged`, `${Math.floor(t.elapsed / 60)}m ${t.elapsed % 60}s recorded`, t.color)
       return null
     })
   }, [pushNotif])
-
-  const cancelTimer = useCallback(() => {
-    setTimer(null)
-  }, [])
-
+  const cancelTimer     = useCallback(() => setTimer(null), [])
   const requestNotifPerm = useCallback(async () => {
     if (typeof Notification === 'undefined') return
     const perm = await Notification.requestPermission()
     setNotifGranted(perm === 'granted')
   }, [])
-
-  const dismissToast = useCallback((toastId) => {
-    setToasts(prev => prev.filter(t => t.toastId !== toastId))
-  }, [])
-
-  const clearLog = useCallback(() => {
-    setNotifLog([])
-  }, [])
+  const dismissToast    = useCallback((toastId) => setToasts(prev => prev.filter(t => t.toastId !== toastId)), [])
+  const clearLog        = useCallback(() => setNotifLog([]), [])
+  const toggleSound     = useCallback(() => setSoundEnabled(v => !v), [])
 
   return {
     state, now, timer, toasts, notifLog,
     currentTaskId, tasksDone, prayersDone, notifGranted, weekScores,
+    soundEnabled,
     toggleTask, addScreen, resetScreen, resetDay,
     startTimer, stopTimer, cancelTimer,
-    requestNotifPerm, dismissToast, clearLog, pushNotif,
+    requestNotifPerm, dismissToast, clearLog, pushNotif, toggleSound,
   }
 }

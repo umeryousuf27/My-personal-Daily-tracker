@@ -3,13 +3,15 @@ import { QUOTES } from '../data'
 import styles from './Sidebar.module.css'
 
 const NAV_ITEMS = [
-  { id: 'today',  icon: '◈', label: 'Today',          color: 'blue',   section: 'Overview' },
-  { id: 'week',   icon: '⬡', label: 'This Week',      color: 'purple', section: 'Overview' },
-  { id: 'prayer', icon: '☽', label: 'Prayers',        color: 'green',  section: 'Focus Areas', badge: true, badgeType: 'prayers' },
-  { id: 'lc',     icon: '⬡', label: 'DSA / Leetcode', color: 'blue',   section: 'Focus Areas', badge: true, badgeType: 'lc' },
-  { id: 'quran',  icon: '✦', label: 'Quran',          color: 'pink',   section: 'Focus Areas' },
-  { id: 'spring', icon: '⬡', label: 'Spring Boot',    color: 'purple', section: 'Focus Areas' },
-  { id: 'screen', icon: '◉', label: 'Screen Time',    color: 'amber',  section: 'Limits',      badge: true, badgeType: 'screen' },
+  { id: 'today',   icon: '◈', label: 'Today',          color: 'blue',   section: 'Overview' },
+  { id: 'history', icon: '📅', label: 'History',        color: 'purple', section: 'Overview' },
+  { id: 'week',    icon: '⬡', label: 'This Week',      color: 'teal',   section: 'Overview' },
+  { id: 'prayer',  icon: '☽', label: 'Prayers',        color: 'green',  section: 'Focus Areas', badge: true, badgeType: 'prayers' },
+  { id: 'lc',      icon: '⬡', label: 'DSA / Leetcode', color: 'blue',   section: 'Focus Areas', badge: true, badgeType: 'lc' },
+  { id: 'quran',   icon: '✦', label: 'Quran',          color: 'pink',   section: 'Focus Areas' },
+  { id: 'spring',  icon: '⬡', label: 'Spring Boot',    color: 'purple', section: 'Focus Areas' },
+  { id: 'screen',  icon: '◉', label: 'Screen Time',    color: 'amber',  section: 'Limits',      badge: true, badgeType: 'screen' },
+  { id: 'ai',      icon: '✦', label: 'AI Prep Guide',  color: 'teal',   section: 'Tools' },
 ]
 
 const COLOR_MAP = {
@@ -21,7 +23,7 @@ const DIM_MAP = {
   purple: 'rgba(167,139,250,0.12)', pink: 'rgba(244,114,182,0.12)', red: 'rgba(248,113,113,0.12)', teal: 'rgba(45,212,191,0.12)'
 }
 
-export default function Sidebar({ prayersDone, lcHours, screenMins, onSetView, activeView }) {
+export default function Sidebar({ prayersDone, lcHours, screenMins, onSetView, activeView, soundEnabled, onToggleSound }) {
   const quote = useMemo(() => QUOTES[Math.floor(Math.random() * QUOTES.length)], [])
 
   const getBadge = (item) => {
@@ -32,7 +34,7 @@ export default function Sidebar({ prayersDone, lcHours, screenMins, onSetView, a
     return null
   }
 
-  const sections = ['Overview', 'Focus Areas', 'Limits']
+  const sections = ['Overview', 'Focus Areas', 'Limits', 'Tools']
 
   return (
     <aside className={styles.sidebar}>
@@ -62,10 +64,7 @@ export default function Sidebar({ prayersDone, lcHours, screenMins, onSetView, a
                   </span>
                   <span className={styles.label}>{item.label}</span>
                   {badge && (
-                    <span
-                      className={styles.badge}
-                      style={{ color: COLOR_MAP[item.color] }}
-                    >
+                    <span className={styles.badge} style={{ color: COLOR_MAP[item.color] }}>
                       {badge}
                     </span>
                   )}
@@ -75,6 +74,19 @@ export default function Sidebar({ prayersDone, lcHours, screenMins, onSetView, a
           </div>
         ))}
       </nav>
+
+      {/* Sound toggle */}
+      <div className={styles.soundRow}>
+        <span className={styles.soundLabel}>🔔 Notification Sound</span>
+        <button
+          id="sound-toggle"
+          className={`${styles.soundBtn} ${soundEnabled ? styles.soundOn : ''}`}
+          onClick={onToggleSound}
+          title={soundEnabled ? 'Sound ON — click to mute' : 'Sound OFF — click to enable'}
+        >
+          {soundEnabled ? 'ON' : 'OFF'}
+        </button>
+      </div>
 
       <div className={styles.quoteCard}>
         <p className={`${styles.quoteText} serif`}>{quote.text}</p>

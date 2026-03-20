@@ -21,12 +21,35 @@ export const PRAYERS = [
 ]
 
 export const QUOTES = [
-  { text: '"Verily, with hardship comes ease."',                                          src: '— Quran 94:5' },
-  { text: '"And He found you lost and guided you."',                                      src: '— Quran 93:7' },
-  { text: '"Take benefit of five before five: youth, health, wealth, free time, life."', src: '— Prophet ﷺ' },
-  { text: '"The strong man controls himself in anger."',                                  src: '— Prophet ﷺ' },
-  { text: '"Be in this world as if you were a stranger or a traveller."',                 src: '— Prophet ﷺ' },
-  { text: '"Whoever treads a path seeking knowledge, Allah eases his path to Jannah."',  src: '— Prophet ﷺ' },
+  { text: '"Verily, with hardship comes ease."',                                             src: '— Quran 94:5' },
+  { text: '"And He found you lost and guided you."',                                         src: '— Quran 93:7' },
+  { text: '"Take benefit of five before five: youth, health, wealth, free time, life."',    src: '— Prophet ﷺ' },
+  { text: '"The strong man is not the one who is physically powerful, but the one who controls himself in anger."', src: '— Prophet ﷺ' },
+  { text: '"Be in this world as if you were a stranger or a traveller."',                    src: '— Prophet ﷺ' },
+  { text: '"Whoever treads a path seeking knowledge, Allah eases his path to Jannah."',     src: '— Prophet ﷺ' },
+  { text: '"Indeed, Allah will not change the condition of a people until they change what is in themselves."', src: '— Quran 13:11' },
+  { text: '"So be patient. Indeed, the promise of Allah is truth."',                         src: '— Quran 30:60' },
+  { text: '"And whoever relies upon Allah — then He is sufficient for him."',                src: '— Quran 65:3' },
+  { text: '"Allah does not burden a soul beyond that it can bear."',                         src: '— Quran 2:286' },
+  { text: '"And seek help through patience and prayer."',                                    src: '— Quran 2:45' },
+  { text: '"Do not lose hope, nor be sad."',                                                 src: '— Quran 3:139' },
+  { text: '"My success is not but through Allah. Upon Him I have relied."',                  src: '— Quran 11:88' },
+  { text: '"And remember your Lord when you forget."',                                       src: '— Quran 18:24' },
+  { text: '"Indeed, Allah is with those who are patient."',                                  src: '— Quran 2:153' },
+  { text: '"Whoever works righteousness — it is for his own soul."',                         src: '— Quran 41:46' },
+  { text: '"Nothing will befall us except what Allah has decreed for us."',                  src: '— Quran 9:51' },
+  { text: '"The best among you are those who learn the Quran and teach it."',               src: '— Prophet ﷺ' },
+  { text: '"A moment of patience in a moment of anger saves a thousand moments of regret."', src: '— Prophet ﷺ' },
+  { text: '"Richness is not having many possessions. Rather, true richness is the richness of the soul."', src: '— Prophet ﷺ' },
+]
+
+export const MOTIVATIONAL_BANNERS = [
+  { text: 'Your consistency today builds the engineer of tomorrow.', icon: '⚡' },
+  { text: 'One problem a day keeps the interview anxiety away.', icon: '🧠' },
+  { text: 'Allah sees your effort even when no one else does.', icon: '🌙' },
+  { text: 'FAST NUCES → Big Tech. You\'re on the path. Stay on it.', icon: '🚀' },
+  { text: 'The best time to solve a leetcode problem was yesterday. The second best is now.', icon: '💻' },
+  { text: 'Your dua + your grind = unstoppable.', icon: '✨' },
 ]
 
 export const NEETCODE_150 = [
@@ -90,7 +113,7 @@ export const NEETCODE_150 = [
   { id:51,  title:'Subtree of Another Tree',                               slug:'subtree-of-another-tree',                               topic:'Trees',                   difficulty:'Easy'   },
   { id:52,  title:'Lowest Common Ancestor of BST',                         slug:'lowest-common-ancestor-of-a-binary-search-tree',        topic:'Trees',                   difficulty:'Medium' },
   { id:53,  title:'Binary Tree Level Order Traversal',                     slug:'binary-tree-level-order-traversal',                     topic:'Trees',                   difficulty:'Medium' },
-  { id:54,  title:'Binary Tree Right Side View',                           slug:'binary-tree-right-side-view',                           topic:'Trees',                   difficulty:'Medium' },
+  { id:54,  title:'Binary Tree Right Side View',                           slug:'binary-tree-right-side-view',                           topic:'Trees',                   difficulty:'Easy'   },
   { id:55,  title:'Count Good Nodes in Binary Tree',                       slug:'count-good-nodes-in-binary-tree',                       topic:'Trees',                   difficulty:'Medium' },
   { id:56,  title:'Validate Binary Search Tree',                           slug:'validate-binary-search-tree',                           topic:'Trees',                   difficulty:'Medium' },
   { id:57,  title:'Kth Smallest Element in a BST',                         slug:'kth-smallest-element-in-a-bst',                         topic:'Trees',                   difficulty:'Medium' },

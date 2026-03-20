@@ -1,0 +1,189 @@
+.wrapper {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statNum {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+
+.statLbl {
+  font-size: 9px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.divider {
+  color: var(--text3);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.chart {
+  display: flex;
+  gap: 8px;
+  height: 120px;
+  margin-bottom: 12px;
+}
+
+.yAxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.yAxis span {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+}
+
+.barsArea {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding-bottom: 20px;
+}
+
+.gridLines {
+  position: absolute;
+  inset: 0;
+  bottom: 20px;
+  pointer-events: none;
+}
+
+.gridLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border);
+}
+
+.barCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  position: relative;
+}
+
+.barWrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+}
+
+.barLabel {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+
+.bar {
+  width: 100%;
+  max-width: 28px;
+  border-radius: 4px 4px 2px 2px;
+  transition: height 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+}
+
+.barToday {
+  box-shadow: 0 0 8px rgba(74,158,255,0.35);
+}
+
+.barFuture {
+  background: var(--bg4) !important;
+  height: 2px !important;
+  opacity: 0.3 !important;
+  border-radius: 2px !important;
+}
+
+.dayLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-top: 5px;
+  position: absolute;
+  bottom: 0;
+}
+
+.dayToday {
+  color: var(--blue) !important;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.summaryIcon {
+  font-size: 12px;
+}
+
+.summaryText {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.summaryText strong {
+  color: var(--text);
+  font-weight: 700;
+}
