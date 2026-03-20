@@ -1,0 +1,197 @@
+.wrapper {
+  flex: 1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resetBtn {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  transition: all 0.15s;
+}
+
+.resetBtn:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  gap: 0;
+  min-height: 60px;
+}
+
+.timeCol {
+  width: 52px;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 14px;
+  flex-shrink: 0;
+}
+
+.time {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  white-space: nowrap;
+}
+
+.spineCol {
+  width: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  padding-top: 18px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  flex-shrink: 0;
+  z-index: 1;
+  transition: all 0.2s;
+}
+
+.line {
+  width: 1px;
+  flex: 1;
+  background: var(--border);
+  min-height: 12px;
+  margin-top: 4px;
+}
+
+.card {
+  flex: 1;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.card:hover {
+  background: var(--bg3);
+  border-color: var(--border2);
+}
+
+.done {
+  opacity: 0.5;
+}
+
+.current {
+  border-color: rgba(34,199,122,0.3);
+  box-shadow: 0 0 0 1px rgba(34,199,122,0.08);
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.taskName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+  color: var(--text3);
+}
+
+.sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.cardTopRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.nowBadge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--green);
+  background: var(--green-d);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.catBadge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.lcBar {
+  height: 2px;
+  background: var(--bg4);
+  border-radius: 2px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.lcFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.timerBtn {
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  transition: all 0.15s;
+}
+
+.timerBtn:hover {
+  opacity: 0.8;
+}

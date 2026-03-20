@@ -1,0 +1,79 @@
+.wrapper {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.count {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Syne', sans-serif;
+}
+
+.slot:hover {
+  border-color: var(--green);
+}
+
+.done {
+  background: var(--green-d) !important;
+  border-color: var(--green) !important;
+}
+
+.done .check, .done .name, .done .time {
+  color: var(--green);
+}
+
+.check {
+  font-size: 14px;
+  color: var(--text3);
+  line-height: 1;
+}
+
+.name {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text2);
+  text-align: center;
+}
+
+.time {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: var(--text3);
+}
