@@ -40,6 +40,30 @@
   flex-direction: column;
 }
 
+.nextBanner {
+  background: var(--blue-d);
+  border: 1px solid rgba(74, 158, 255, 0.2);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  margin-bottom: 20px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.nextText {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.nextText strong {
+  font-weight: 700;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .row {
   display: flex;
   gap: 0;
@@ -78,6 +102,15 @@
   flex-shrink: 0;
   z-index: 1;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkIcon {
+  font-size: 8px;
+  color: #fff;
+  font-weight: 800;
 }
 
 .line {

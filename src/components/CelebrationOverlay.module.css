@@ -1,0 +1,116 @@
+.overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  display: flex;
+  align-items: center; justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --- Spiritual Mode --- */
+.spiritualCard {
+  position: relative;
+  background: rgba(12, 12, 15, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 50px 70px;
+  border-radius: var(--r);
+  border: 1px solid rgba(34, 199, 122, 0.4);
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(34, 199, 122, 0.1);
+  transform: scale(0.95);
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.visible .spiritualCard {
+  transform: scale(1);
+}
+
+.geomPattern {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 250px; height: 250px;
+  background: conic-gradient(from 0deg, transparent 40%, rgba(34,199,122,0.1) 60%, transparent 80%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: spinSlow 15s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes spinSlow {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.arabic {
+  font-size: 56px;
+  color: var(--green);
+  text-shadow: 0 0 20px rgba(34,199,122,0.4);
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.english {
+  font-size: 16px;
+  color: var(--text);
+  opacity: 0.9;
+  letter-spacing: 0.5px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.streakBadge {
+  margin-top: 24px;
+  display: inline-block;
+  background: var(--bg4);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--amber);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+}
+
+
+/* --- Gaming Mode --- */
+.gamingCard {
+  text-align: center;
+  transform: scale(0.8);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.visible .gamingCard {
+  transform: scale(1);
+}
+
+.gamingTitle {
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--green);
+  text-shadow: 0 4px 12px rgba(34, 199, 122, 0.5);
+  letter-spacing: -2px;
+  margin-bottom: -10px;
+}
+
+.xpText {
+  color: var(--amber);
+  font-size: 28px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  text-shadow: 0 2px 10px rgba(245, 166, 35, 0.4);
+  animation: xpFloat 1.5s ease forwards;
+}
+
+@keyframes xpFloat {
+  0% { transform: translateY(20px); opacity: 0; }
+  30% { transform: translateY(0px); opacity: 1; }
+  100% { transform: translateY(-30px); opacity: 0; }
+}

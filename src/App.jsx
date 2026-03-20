@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTracker } from './hooks/useTracker'
+import { useSettingsCtx } from './context/SettingsContext'
 import Topbar from './components/Topbar'
 import Sidebar from './components/Sidebar'
 import StatCards from './components/StatCards'
@@ -7,13 +8,34 @@ import ActiveTimer from './components/ActiveTimer'
 import Timeline from './components/Timeline'
 import RightPanel from './components/RightPanel'
 import LeetcodePanel from './components/LeetcodePanel'
+import SpringBootPanel from './components/SpringBootPanel'
+import DatabasePanel from './components/DatabasePanel'
+import SettingsPanel from './components/SettingsPanel'
 import ToastContainer from './components/ToastContainer'
+import CelebrationOverlay from './components/CelebrationOverlay'
+import WeeklyReflection from './components/WeeklyReflection'
 import { SCHEDULE } from './data'
 import styles from './App.module.css'
 
 export default function App() {
   const tracker = useTracker()
+  const { settings } = useSettingsCtx()
   const [view, setView] = useState('today')
+
+  const [overlayActive, setOverlayActive] = useState(null) // 'all_tasks' | 'all_prayers' | null
+
+  // Watch for completed events to trigger celebration
+  useEffect(() => {
+    if (tracker.tasksDone === SCHEDULE.length && tracker.tasksDone > 0) {
+      setOverlayActive('all_tasks')
+    }
+  }, [tracker.tasksDone])
+
+  useEffect(() => {
+    if (tracker.prayersDone === 5) {
+      setOverlayActive('all_prayers')
+    }
+  }, [tracker.prayersDone])
 
   const lcHours = Math.floor((tracker.state.lcSeconds || 0) / 3600)
 
@@ -25,6 +47,8 @@ export default function App() {
         total={SCHEDULE.length}
         notifGranted={tracker.notifGranted}
         onNotif={tracker.requestNotifPerm}
+        xp={tracker.state.xp}
+        streak={tracker.state.streaks?.current}
       />
 
       <Sidebar
@@ -33,13 +57,17 @@ export default function App() {
         screenMins={tracker.state.screenMins}
         onSetView={setView}
         activeView={view}
-        soundEnabled={tracker.soundEnabled}
-        onToggleSound={tracker.toggleSound}
       />
 
       <main className={styles.main}>
-        {view === 'lc' ? (
+        {view === 'settings' ? (
+          <SettingsPanel />
+        ) : view === 'lc' ? (
           <LeetcodePanel />
+        ) : view === 'spring' ? (
+          <SpringBootPanel />
+        ) : view === 'db' ? (
+          <DatabasePanel />
         ) : (
           <>
             <StatCards
@@ -80,6 +108,17 @@ export default function App() {
       />
 
       <ToastContainer toasts={tracker.toasts} onDismiss={tracker.dismissToast} />
+
+      {overlayActive && (
+        <CelebrationOverlay
+          type={overlayActive}
+          styleMode={settings.habit.celebrationStyle}
+          stats={{ streak: tracker.state.streaks?.current }}
+          onClose={() => setOverlayActive(null)}
+        />
+      )}
+
+      <WeeklyReflection />
     </div>
   )
 }

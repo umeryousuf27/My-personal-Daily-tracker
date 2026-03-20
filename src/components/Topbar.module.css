@@ -74,6 +74,38 @@
   justify-content: flex-end;
 }
 
+.streakBadge {
+  color: var(--amber);
+  background: var(--bg4);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(245, 166, 35, 0.2);
+}
+
+.xpBadge {
+  color: var(--purple);
+  background: var(--bg4);
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lvl {
+  font-size: 10px;
+  background: var(--purple);
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
 .date {
   font-size: 13px;
   color: var(--text2);

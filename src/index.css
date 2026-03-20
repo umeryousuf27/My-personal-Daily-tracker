@@ -72,3 +72,38 @@ a {
 /* Utility */
 .mono { font-family: 'DM Mono', monospace; }
 .serif { font-family: 'DM Serif Display', serif; }
+
+/* Light Theme Overrides */
+[data-theme="light"] {
+  --bg:      #f5f4f0;
+  --bg2:     #ffffff;
+  --bg3:     #eeede8;
+  --bg4:     #e4e3de;
+  --border:  rgba(0,0,0,0.07);
+  --border2: rgba(0,0,0,0.13);
+  --text:    #1a1a1e;
+  --text2:   #6a6a78;
+  --text3:   #aaaab4;
+}
+
+/* Animations */
+@keyframes nowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 199, 122, 0); }
+  50%       { box-shadow: 0 0 0 6px rgba(34, 199, 122, 0.15); }
+}
+
+@keyframes taskDone {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.97); }
+  70%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.card-bounce { 
+  animation: taskDone 0.25s ease forwards; 
+}
+
+@keyframes floatUp {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}

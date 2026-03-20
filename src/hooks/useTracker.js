@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { SCHEDULE, PRAYERS } from '../data'
+import { useSettingsCtx } from '../context/SettingsContext'
+import { Sounds } from '../utils/sounds'
 
 const STORAGE_KEY = 'umer_tracker_v3'
 const LC_KEY = 'umer_lc_progress'
@@ -12,41 +14,6 @@ function formatHHMM(date) {
   return date.toTimeString().slice(0, 5)
 }
 
-// ─── Notification Chime (Web Audio API, no files needed) ────────────────────
-let audioContext = null;
-
-function playChime() {
-  try {
-    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const ctx = audioContext;
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const now = ctx.currentTime;
-    // Premium Chord (Amaj9 inspired)
-    const notes = [
-      { freq: 440,   dur: 0.6, vol: 0.15 }, // Root
-      { freq: 554.37, dur: 0.5, vol: 0.10 }, // C#
-      { freq: 659.25, dur: 0.4, vol: 0.08 }, // E
-      { freq: 830.61, dur: 0.4, vol: 0.05 }, // G#
-    ];
-
-    notes.forEach(({ freq, dur, vol }, i) => {
-      const start = now + (i * 0.02); // Stagger
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, start);
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(vol, start + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
-      osc.start(start);
-      osc.stop(start + dur + 0.1);
-    });
-  } catch (e) { console.error('Audio failed:', e); }
-}
-
 // ─── State helpers ────────────────────────────────────────────────────────────
 function loadState() {
   try {
@@ -56,7 +23,7 @@ function loadState() {
   return null
 }
 
-function freshState(weekScores = {}, weekData = {}) {
+function freshState(weekScores = {}, weekData = {}, saved = null) {
   return {
     date: todayISO(),
     tasks: {},
@@ -64,6 +31,8 @@ function freshState(weekScores = {}, weekData = {}) {
     screenMins: 0,
     weekScores,
     weekData,
+    streaks: saved?.streaks || { current: 0, longest: 0, lastCompletedDate: null },
+    xp: saved?.xp || { total: 0, level: 1, levelXP: 0 },
   }
 }
 
@@ -86,9 +55,27 @@ function maybeReset(saved) {
       const keys = Object.keys(weekData).sort().slice(-14)
       const trimmed = {}
       keys.forEach(k => { trimmed[k] = weekData[k] })
-      return freshState(weekScores, trimmed)
+      let newStreaks = { ...(saved.streaks || { current: 0, longest: 0, lastCompletedDate: null }) };
+      if (tasksDone >= 8) {
+        // Did they miss a day?
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yDayStr = yesterday.toISOString().slice(0, 10);
+        
+        if (newStreaks.lastCompletedDate === yDayStr) {
+          newStreaks.current += 1; // Streak continues!
+        } else if (newStreaks.lastCompletedDate !== saved.date) {
+          newStreaks.current = 1; // Start new streak
+        }
+        newStreaks.lastCompletedDate = saved.date;
+        if (newStreaks.current > newStreaks.longest) newStreaks.longest = newStreaks.current;
+      } else {
+        newStreaks.current = 0; // Broken streak
+      }
+
+      return freshState(weekScores, trimmed, { ...saved, streaks: newStreaks })
     }
-    return freshState(weekScores, weekData)
+    return freshState(weekScores, weekData, saved)
   }
   return saved
 }
@@ -97,6 +84,8 @@ let toastIdCounter = 0
 let notifIdCounter = 0
 
 export function useTracker() {
+  const { settings } = useSettingsCtx() || { settings: { soundEnabled: true, sounds: {} } }
+  
   const [state, setState]       = useState(() => maybeReset(loadState()))
   const [now, setNow]           = useState(new Date())
   const [timer, setTimer]       = useState(null)
@@ -105,9 +94,6 @@ export function useTracker() {
   const [notifGranted, setNotifGranted] = useState(
     typeof Notification !== 'undefined' && Notification.permission === 'granted'
   )
-  const [soundEnabled, setSoundEnabled] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('umer_sound') ?? 'true') } catch { return true }
-  })
 
   const notifFired = useRef({})
   const timerRef   = useRef(null)
@@ -116,11 +102,6 @@ export function useTracker() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [state])
-
-  // Persist sound preference
-  useEffect(() => {
-    localStorage.setItem('umer_sound', JSON.stringify(soundEnabled))
-  }, [soundEnabled])
 
   // Clock tick
   useEffect(() => {
@@ -138,19 +119,22 @@ export function useTracker() {
   }, [timer?.taskId, timer?.startMs])
 
   // Push notification (internal + toast + sound + browser)
-  const pushNotif = useCallback((title, body, color = 'blue') => {
+  const pushNotif = useCallback((title, body, color = 'blue', isPrayer = false) => {
     const id    = ++notifIdCounter
     const entry = { id, title, body, color, time: formatHHMM(new Date()) }
 
     setToasts(prev  => [{ ...entry, toastId: ++toastIdCounter }, ...prev])
     setNotifLog(prev => [entry, ...prev].slice(0, 20))
 
-    if (soundEnabled) playChime()
+    if (settings.soundEnabled) {
+      if (isPrayer && settings.sounds?.prayerCall) Sounds.prayerCall()
+      else if (settings.sounds?.notificationChime) Sounds.notificationChime()
+    }
 
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
       try { new Notification(`Umer Tracker — ${title}`, { body }) } catch {}
     }
-  }, [soundEnabled])
+  }, [settings])
 
   // Schedule notifications (fires on exact second=0)
   useEffect(() => {
@@ -203,19 +187,64 @@ export function useTracker() {
   })()
 
   // ─── Actions ──────────────────────────────────────────────────────────────────
-  const toggleTask      = useCallback((id) => setState(s => ({ ...s, tasks: { ...s.tasks, [id]: !s.tasks[id] } })), [])
+  // ─── XP logic ─────────────────────────────────────────────────────────────────
+  const addXP = useCallback((amount) => {
+    setState(s => {
+      let { total, level, levelXP } = s.xp || { total: 0, level: 1, levelXP: 0 };
+      total += amount;
+      levelXP += amount;
+      let threshold = 200 + (level * 100);
+      while (levelXP >= threshold) { // Level up
+        levelXP -= threshold;
+        level += 1;
+        threshold = 200 + (level * 100);
+      }
+      return { ...s, xp: { total, level, levelXP } };
+    });
+  }, []);
+
+  // ─── Actions ──────────────────────────────────────────────────────────────────
+  const toggleTask = useCallback((id) => {
+    setState(s => {
+      const nowDone = !s.tasks[id];
+      const nextTasks = { ...s.tasks, [id]: nowDone };
+      const tasksDoneNow = Object.values(nextTasks).filter(Boolean).length;
+      const prayersDoneNow = PRAYERS.filter(p => nextTasks[p.id]).length;
+      const isPrayer = PRAYERS.some(p => p.id === id);
+
+      if (nowDone) {
+        if (settings.soundEnabled) {
+          if (settings.sounds?.taskComplete) Sounds.taskComplete();
+          if (isPrayer && settings.sounds?.prayerComplete) Sounds.prayerComplete();
+          if (prayersDoneNow === 5 && !s.tasks[id] && settings.sounds?.allPrayersDone) Sounds.allPrayersDone();
+          if (tasksDoneNow === SCHEDULE.length && !s.tasks[id] && settings.sounds?.allTasksDone) Sounds.allTasksDone();
+        }
+        addXP(isPrayer ? 50 : 30);
+      } else {
+        if (settings.soundEnabled && settings.sounds?.taskUncomplete) Sounds.taskUncomplete();
+      }
+
+      return { ...s, tasks: nextTasks };
+    });
+  }, [settings, addXP]);
+
   const addScreen       = useCallback((mins) => setState(s => ({ ...s, screenMins: (s.screenMins || 0) + mins })), [])
   const resetScreen     = useCallback(() => setState(s => ({ ...s, screenMins: 0 })), [])
-  const resetDay        = useCallback(() => { setState(s => ({ ...freshState(s.weekScores, s.weekData) })); setTimer(null); notifFired.current = {} }, [])
-  const startTimer      = useCallback((id, name, color) => setTimer({ taskId: id, taskName: name, color, startMs: Date.now(), elapsed: 0 }), [])
+  const resetDay        = useCallback(() => { setState(s => ({ ...freshState(s.weekScores, s.weekData, s) })); setTimer(null); notifFired.current = {} }, [])
+  const startTimer      = useCallback((id, name, color) => {
+    if (settings.soundEnabled && settings.sounds?.timerStart) Sounds.timerStart();
+    setTimer({ taskId: id, taskName: name, color, startMs: Date.now(), elapsed: 0 })
+  }, [settings])
   const stopTimer       = useCallback(() => {
+    if (settings.soundEnabled && settings.sounds?.timerStop) Sounds.timerStop();
     setTimer(t => {
       if (!t) return null
       if (t.taskId === 'lc') setState(s => ({ ...s, lcSeconds: (s.lcSeconds || 0) + t.elapsed }))
+      addXP(Math.floor(t.elapsed / 60)); // 1 XP per minute
       pushNotif(`${t.taskName} logged`, `${Math.floor(t.elapsed / 60)}m ${t.elapsed % 60}s recorded`, t.color)
       return null
     })
-  }, [pushNotif])
+  }, [pushNotif, settings, addXP])
   const cancelTimer     = useCallback(() => setTimer(null), [])
   const requestNotifPerm = useCallback(async () => {
     if (typeof Notification === 'undefined') return
@@ -224,20 +253,14 @@ export function useTracker() {
   }, [])
   const dismissToast    = useCallback((toastId) => setToasts(prev => prev.filter(t => t.toastId !== toastId)), [])
   const clearLog        = useCallback(() => setNotifLog([]), [])
-  const toggleSound = useCallback(() => {
-    setSoundEnabled(v => {
-      const next = !v;
-      if (next) playChime(); // Test it!
-      return next;
-    });
-  }, []);
 
   return {
     state, now, timer, toasts, notifLog,
     currentTaskId, tasksDone, prayersDone, notifGranted, weekScores,
-    soundEnabled,
+    soundEnabled: settings.soundEnabled,
     toggleTask, addScreen, resetScreen, resetDay,
     startTimer, stopTimer, cancelTimer,
-    requestNotifPerm, dismissToast, clearLog, pushNotif, toggleSound,
+    requestNotifPerm, dismissToast, clearLog, pushNotif,
+    addXP,
   }
 }

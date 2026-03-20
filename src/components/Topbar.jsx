@@ -1,11 +1,13 @@
 import styles from './Topbar.module.css'
+import { useSettingsCtx } from '../context/SettingsContext'
 
 function pad(n) { return String(n).padStart(2, '0') }
 
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
-export default function Topbar({ now, tasksDone, total, notifGranted, onNotif }) {
+export default function Topbar({ now, tasksDone, total, notifGranted, onNotif, xp, streak }) {
+  const { settings } = useSettingsCtx()
   const hh = pad(now.getHours())
   const mm = pad(now.getMinutes())
   const ss = pad(now.getSeconds())
@@ -13,6 +15,8 @@ export default function Topbar({ now, tasksDone, total, notifGranted, onNotif })
   const dayName = DAYS[now.getDay()]
   const monthName = MONTHS[now.getMonth()]
   const day = now.getDate()
+
+  const safeXP = xp || { total: 0, level: 1 }
 
   return (
     <header className={styles.topbar}>
@@ -31,6 +35,12 @@ export default function Topbar({ now, tasksDone, total, notifGranted, onNotif })
       </div>
 
       <div className={styles.right}>
+        {settings.habit.showStreak && streak > 0 && (
+          <span className={styles.streakBadge}>🔥 {streak} days</span>
+        )}
+        {settings.habit.showXP && (
+          <span className={styles.xpBadge}>⚡ {safeXP.total.toLocaleString()} XP <span className={styles.lvl}>Lv.{safeXP.level}</span></span>
+        )}
         <span className={styles.date}>{dayName}, {monthName} {day}</span>
         <div className={styles.pill}>
           <span className={styles.pillLabel}>Tasks</span>
