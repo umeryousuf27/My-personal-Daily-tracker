@@ -33,6 +33,8 @@ export default function App() {
         screenMins={tracker.state.screenMins}
         onSetView={setView}
         activeView={view}
+        soundEnabled={tracker.soundEnabled}
+        onToggleSound={tracker.toggleSound}
       />
 
       <main className={styles.main}>

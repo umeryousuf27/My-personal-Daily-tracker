@@ -13,28 +13,38 @@ function formatHHMM(date) {
 }
 
 // ─── Notification Chime (Web Audio API, no files needed) ────────────────────
+let audioContext = null;
+
 function playChime() {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = audioContext;
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+    // Premium Chord (Amaj9 inspired)
     const notes = [
-      { freq: 880,  start: 0,    dur: 0.18 },
-      { freq: 1108, start: 0.18, dur: 0.18 },
-      { freq: 1320, start: 0.36, dur: 0.35 },
-    ]
-    notes.forEach(({ freq, start, dur }) => {
-      const osc  = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.type = 'sine'
-      osc.frequency.value = freq
-      gain.gain.setValueAtTime(0, ctx.currentTime + start)
-      gain.gain.linearRampToValueAtTime(0.28, ctx.currentTime + start + 0.025)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur)
-      osc.start(ctx.currentTime + start)
-      osc.stop(ctx.currentTime + start + dur + 0.05)
-    })
-  } catch (_) {}
+      { freq: 440,   dur: 0.6, vol: 0.15 }, // Root
+      { freq: 554.37, dur: 0.5, vol: 0.10 }, // C#
+      { freq: 659.25, dur: 0.4, vol: 0.08 }, // E
+      { freq: 830.61, dur: 0.4, vol: 0.05 }, // G#
+    ];
+
+    notes.forEach(({ freq, dur, vol }, i) => {
+      const start = now + (i * 0.02); // Stagger
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(vol, start + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      osc.start(start);
+      osc.stop(start + dur + 0.1);
+    });
+  } catch (e) { console.error('Audio failed:', e); }
 }
 
 // ─── State helpers ────────────────────────────────────────────────────────────
@@ -214,7 +224,13 @@ export function useTracker() {
   }, [])
   const dismissToast    = useCallback((toastId) => setToasts(prev => prev.filter(t => t.toastId !== toastId)), [])
   const clearLog        = useCallback(() => setNotifLog([]), [])
-  const toggleSound     = useCallback(() => setSoundEnabled(v => !v), [])
+  const toggleSound = useCallback(() => {
+    setSoundEnabled(v => {
+      const next = !v;
+      if (next) playChime(); // Test it!
+      return next;
+    });
+  }, []);
 
   return {
     state, now, timer, toasts, notifLog,
