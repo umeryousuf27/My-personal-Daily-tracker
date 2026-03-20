@@ -90,6 +90,7 @@ export default function App() {
               onToggle={tracker.toggleTask}
               onStartTimer={tracker.startTimer}
               onResetDay={tracker.resetDay}
+              entertainmentMode={tracker.entertainmentMode}
             />
           </>
         )}
@@ -101,10 +102,12 @@ export default function App() {
         screenMins={tracker.state.screenMins}
         weekScores={tracker.weekScores}
         notifLog={tracker.notifLog}
+        entertainmentMode={tracker.entertainmentMode}
         onToggleTask={tracker.toggleTask}
         onAddScreen={tracker.addScreen}
         onResetScreen={tracker.resetScreen}
         onClearLog={tracker.clearLog}
+        onToggleEntertainment={tracker.toggleEntertainmentMode}
       />
 
       <ToastContainer toasts={tracker.toasts} onDismiss={tracker.dismissToast} />

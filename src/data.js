@@ -10,6 +10,7 @@ export const SCHEDULE = [
   { id:'maghrib', time:'18:30', h:18, m:30, task:'Maghrib Prayer',            sub:'Sunset salah — pause everything',                 cat:'prayer', color:'green',  timeable:false },
   { id:'quran',   time:'19:00', h:19, m:0,  task:'Quran Recitation',          sub:'Daily wird — consistency over quantity',          cat:'quran',  color:'pink',   timeable:false },
   { id:'isha',    time:'20:30', h:20, m:30, task:'Isha Prayer',               sub:'Night salah — close the day right',               cat:'prayer', color:'green',  timeable:false },
+  { id:'gym',     time:'21:00', h:21, m:0,  task:'Gym & Workout',             sub:'Physical health is an amanah — push limits',      cat:'health', color:'amber',  timeable:true  },
 ]
 
 export const PRAYERS = [

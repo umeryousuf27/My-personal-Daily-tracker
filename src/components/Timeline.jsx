@@ -16,7 +16,7 @@ const CAT_LABELS = {
   spring: 'Spring Boot', react: 'React', quran: 'Quran'
 }
 
-export default function Timeline({ schedule, tasks, currentTaskId, lcSeconds, onToggle, onStartTimer, onResetDay }) {
+export default function Timeline({ schedule, tasks, currentTaskId, lcSeconds, onToggle, onStartTimer, onResetDay, entertainmentMode }) {
   const { settings } = useSettingsCtx()
   const [bouncingCard, setBouncingCard] = useState(null)
   
@@ -33,7 +33,7 @@ export default function Timeline({ schedule, tasks, currentTaskId, lcSeconds, on
   const currentTotalMins = now.getHours() * 60 + now.getMinutes()
   
   let nextTaskBanner = null
-  if (settings.habit.anticipationMode) {
+  if (settings.habit.anticipationMode && !entertainmentMode) {
     const nextIdx = schedule.findIndex(s => s.h * 60 + s.m > currentTotalMins)
     if (nextIdx !== -1) {
       const nextTask = schedule[nextIdx]
@@ -45,6 +45,31 @@ export default function Timeline({ schedule, tasks, currentTaskId, lcSeconds, on
         }
       }
     }
+  }
+
+  if (entertainmentMode) {
+    return (
+      <div className={styles.wrapper}>
+        <div className={styles.header}>
+          <span className={styles.title}>Burnout / Reward Mode Active</span>
+        </div>
+        <div className={styles.entertainmentModeBox}>
+          <div className={styles.entertainmentIcon}>🧘‍♂️</div>
+          <h2>Rest is Productive</h2>
+          <p>You’ve paused today’s schedule. All active and upcoming tasks are currently suspended guilt-free.</p>
+          <div className={styles.entertainmentOptions}>
+            <p><strong>Available Rewards:</strong></p>
+            <ul>
+              <li>Watch a movie/show 🎬</li>
+              <li>Play a video game 🎮</li>
+              <li>Read a story or book 📚</li>
+              <li>Take a restorative nap 😴</li>
+            </ul>
+          </div>
+          <p className={styles.entertainmentFootnote}>When you are ready to conquer again, disable this mode in the Right Panel.</p>
+        </div>
+      </div>
+    )
   }
 
   return (

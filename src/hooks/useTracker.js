@@ -29,6 +29,7 @@ function freshState(weekScores = {}, weekData = {}, saved = null) {
     tasks: {},
     lcSeconds: 0,
     screenMins: 0,
+    entertainmentMode: false,
     weekScores,
     weekData,
     streaks: saved?.streaks || { current: 0, longest: 0, lastCompletedDate: null },
@@ -254,13 +255,20 @@ export function useTracker() {
   const dismissToast    = useCallback((toastId) => setToasts(prev => prev.filter(t => t.toastId !== toastId)), [])
   const clearLog        = useCallback(() => setNotifLog([]), [])
 
+  const toggleEntertainmentMode = useCallback(() => {
+    if (settings.soundEnabled && settings.sounds?.timerStop) Sounds.timerStop()
+    setTimer(null)
+    setState(s => ({ ...s, entertainmentMode: !s.entertainmentMode }))
+  }, [settings])
+
   return {
     state, now, timer, toasts, notifLog,
     currentTaskId, tasksDone, prayersDone, notifGranted, weekScores,
     soundEnabled: settings.soundEnabled,
+    entertainmentMode: state.entertainmentMode,
     toggleTask, addScreen, resetScreen, resetDay,
     startTimer, stopTimer, cancelTimer,
     requestNotifPerm, dismissToast, clearLog, pushNotif,
-    addXP,
+    addXP, toggleEntertainmentMode,
   }
 }

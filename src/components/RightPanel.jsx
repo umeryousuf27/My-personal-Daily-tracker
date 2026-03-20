@@ -39,11 +39,21 @@ function MiniClock({ now }) {
 
 export default function RightPanel({
   now, tasks, screenMins, weekScores, weekData,
-  notifLog, onToggleTask, onAddScreen, onResetScreen, onClearLog
+  notifLog, entertainmentMode, onToggleTask, onAddScreen, onResetScreen, onClearLog, onToggleEntertainment
 }) {
   return (
     <aside className={styles.panel}>
       <MiniClock now={now} />
+      
+      <div className={styles.entertainmentWrap}>
+        <button 
+          className={`${styles.entertainmentBtn} ${entertainmentMode ? styles.entertainmentActive : ''}`}
+          onClick={onToggleEntertainment}
+        >
+          {entertainmentMode ? '🎮 Exit Entertainment Mode' : '🎮 Enter Burnout / Reward Mode'}
+        </button>
+      </div>
+
       <PrayerGrid prayers={PRAYERS} tasks={tasks} onToggle={onToggleTask} />
       <ScreenTracker screenMins={screenMins} onAdd={onAddScreen} onReset={onResetScreen} />
       <WeekChart weekScores={weekScores} weekData={weekData} />

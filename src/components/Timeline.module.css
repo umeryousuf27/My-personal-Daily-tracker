@@ -228,3 +228,82 @@
 .timerBtn:hover {
   opacity: 0.8;
 }
+
+.entertainmentModeBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: var(--bg2);
+  border: 1px solid var(--purple);
+  border-radius: var(--r);
+  padding: 48px 24px;
+  margin-top: 16px;
+  box-shadow: 0 0 30px rgba(167,139,250,0.1);
+  animation: slideDown 0.4s ease-out;
+}
+
+.entertainmentIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.entertainmentModeBox h2 {
+  font-size: 24px;
+  color: var(--text);
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.entertainmentModeBox p {
+  color: var(--text2);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.entertainmentOptions {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 16px 24px;
+  text-align: left;
+  margin-bottom: 24px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.entertainmentOptions p {
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.entertainmentOptions ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.entertainmentOptions li {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.entertainmentOptions li:last-child {
+  margin-bottom: 0;
+}
+
+.entertainmentFootnote {
+  font-size: 12px !important;
+  color: var(--text3) !important;
+  margin-bottom: 0 !important;
+}
